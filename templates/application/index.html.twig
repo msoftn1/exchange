@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Создание заявки{% endblock %}
+
+{% block javascripts %}
+
+<script>
+
+    $('#create-application').click(function() {
+        var amount = $('#amount').val();
+        var type = $('#type').val();
+        var wallet = $('#wallet').val();
+
+        var data = {"amount":amount, "type":type, "wallet": wallet};
+
+        $("#errors").hide();
+        $("#list-errors").html('');
+        $('#create-application').attr("disabled", true);
+
+        $.post( "{{ path('application_save') }}", data, function( res ) {
+            $('#create-application').attr("disabled", false);
+
+            if(res.status == 'success') {
+                $("#errors").hide();
+                $("#list-errors").html('');
+
+                $("#container-form").html("<h3>Заявка успешно создана.</h3><a href='{{ path('application_index') }}'>Cоздать новую</a>")
+            }
+            else {
+                $("#errors").show();
+                $("#list-errors").html(res.reason);
+            }
+        });
+
+        return false;
+    });
+</script>
+
+{% endblock %}
+
+{% block body %}
+    <div>
+
+        <h1>Создание заявки</h1>
+        <div id="container-form">
+        <form>
+            <div id="errors" style="display:none">
+                <h3>Ошибки создания заявки</h3>
+                <div id="list-errors" style="color:red"></div>
+                <br/>
+            </div>
+            <table>
+                <tr>
+                    <td>Сумма:</td>
+                    <td><input type="text" id="amount" name="amount" style="width: 100px"/></td>
+                </tr>
+                <tr>
+                    <td>Тип обмена:</td>
+                    <td>
+                        <select id="type" name="type" style="width: 100px">
+                            <option value="1">Bitcoin</option>
+                            <option value="2">WMZ</option>
+                            <option value="3">Другой</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Реквизиты:</td>
+                    <td>
+                        <input type="text" id="wallet" name="wallet" style="width: 300px"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2"><input type="button" value="Создать заявку" id="create-application"></td>
+                </tr>
+            </table>
+        </form>
+        </div>
+    </div>
+
+    <div>
+        <h2>Курсы валют</h2>
+
+        <table>
+            <tr>
+                <th>Валюта</th>
+                <th>Покупка</th>
+                <th>Продажа</th>
+            </tr>
+            {% if rates.usd is not empty %}
+            <tr>
+                <td>USD/RUB</td>
+                <td>{{ rates.usd.buy }}</td>
+                <td>{{ rates.usd.sell }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">Нет данных.</td>
+            </tr>
+            {% endif %}
+
+            {% if rates.eur is not empty %}
+            <tr>
+                <td>EUR/RUB</td>
+                <td>{{ rates.eur.buy }}</td>
+                <td>{{ rates.eur.sell }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">Нет данных.</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+{% endblock %}
